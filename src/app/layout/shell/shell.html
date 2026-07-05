@@ -1,0 +1,48 @@
+<header class="topbar">
+  <span class="brand">Library App</span>
+
+  <nav class="tabs">
+    @for (item of navItems(); track item.path) {
+      <a class="tab" [routerLink]="item.path" routerLinkActive="active">{{ item.label }}</a>
+    }
+  </nav>
+
+  <div class="actions">
+    <button
+      type="button"
+      class="icon-button"
+      aria-label="Notifications"
+      (click)="notifPanel.toggle($event)"
+    >
+      <p-overlayBadge severity="danger" [badgeDisabled]="notificationService.unreadCount() === 0">
+        <i class="pi pi-bell"></i>
+      </p-overlayBadge>
+    </button>
+
+    <p-popover #notifPanel (onShow)="notificationService.markAllAsRead()">
+      <div class="notification-panel">
+        @if (notificationService.notifications().length === 0) {
+          <p class="empty">No notifications yet.</p>
+        } @else {
+          <div class="notification-header">
+            <button type="button" class="clear-button" (click)="notificationService.clear()">Clear</button>
+          </div>
+          @for (notification of notificationService.notifications(); track notification.id) {
+            <div class="notification-item" [class.unread]="!notification.read">
+              <p class="message">{{ notification.message }}</p>
+              <p class="timestamp">{{ notification.timestamp | date: 'short' }}</p>
+            </div>
+          }
+        }
+      </div>
+    </p-popover>
+
+    <app-me-menu />
+  </div>
+</header>
+
+<main class="shell-content">
+  <router-outlet />
+</main>
+
+<p-toast />

@@ -1,0 +1,84 @@
+<div class="user-management-page">
+  <div class="toolbar">
+    <label for="role-filter">Show role</label>
+    <p-select
+      inputId="role-filter"
+      [options]="roleOptions"
+      [ngModel]="selectedRole()"
+      [ngModelOptions]="{ standalone: true }"
+      (onChange)="onRoleFilterChange($event.value)"
+    />
+  </div>
+
+  @if (loading()) {
+    <p class="status-text">Loading users...</p>
+  } @else if (users().length === 0) {
+    <p class="status-text">No users with this role.</p>
+  } @else {
+    <table class="user-table">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Full name</th>
+          <th>Email</th>
+          <th>Status</th>
+          <th>Role</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (user of users(); track user.id) {
+          <tr>
+            <td>{{ user.username }}</td>
+            <td>{{ user.fullName }}</td>
+            <td>{{ user.email }}</td>
+            <td><p-tag [value]="user.status" /></td>
+            <td class="role-cell">
+              <p-select
+                [options]="roleOptions"
+                [ngModel]="draftRole(user)"
+                [ngModelOptions]="{ standalone: true }"
+                [disabled]="savingUserId() === user.id"
+                (onChange)="setDraftRole(user, $event.value)"
+              />
+              @if (hasPendingRoleChange(user)) {
+                <button
+                  pButton
+                  type="button"
+                  label="Save"
+                  [text]="true"
+                  [disabled]="savingUserId() === user.id"
+                  (click)="confirmRoleChange(user)"
+                ></button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>
+
+<p-dialog
+  header="Confirm Role Change"
+  [visible]="pendingRoleChange() !== null"
+  (visibleChange)="$event || cancelRoleChange()"
+  [modal]="true"
+  [style]="{ width: '24rem' }"
+>
+  @if (pendingRoleChange(); as pending) {
+    <p>
+      Change <strong>{{ pending.user.username }}</strong>'s role to <strong>{{ pending.role }}</strong>?
+    </p>
+
+    <div class="dialog-actions">
+      <button pButton type="button" label="Cancel" severity="secondary" [text]="true" (click)="cancelRoleChange()"></button>
+      <button
+        pButton
+        type="button"
+        label="Confirm"
+        [loading]="savingUserId() === pending.user.id"
+        (click)="applyRoleChange()"
+      ></button>
+    </div>
+  }
+</p-dialog>

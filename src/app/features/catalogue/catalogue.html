@@ -1,0 +1,198 @@
+<div class="catalogue-page">
+  <div class="toolbar">
+    <input
+      pInputText
+      type="search"
+      placeholder="Search by title..."
+      [value]="search()"
+      (input)="onSearch($any($event.target).value)"
+    />
+    @if (isManager()) {
+      <button pButton type="button" label="Add Book" icon="pi pi-plus" (click)="openAddBook()"></button>
+    }
+  </div>
+
+  @if (loading()) {
+    <p class="status-text">Loading books...</p>
+  } @else if (books().length === 0) {
+    <p class="status-text">No books found.</p>
+  } @else {
+    <div class="book-grid">
+      @for (book of books(); track book.id) {
+        <button type="button" class="book-card" (click)="openBook(book)">
+          <span class="book-title">{{ book.title }}</span>
+          <span class="book-author">{{ book.author }}</span>
+          <span class="book-genre">{{ book.genre }}</span>
+        </button>
+      }
+    </div>
+
+    <p-paginator [first]="first()" [rows]="12" [totalRecords]="totalRecords()" (onPageChange)="onPageChange($event)" />
+  }
+</div>
+
+<p-dialog
+  [header]="selectedBook()?.title ?? ''"
+  [visible]="selectedBook() !== null"
+  (visibleChange)="$event || closeBook()"
+  [modal]="true"
+  [style]="{ width: '28rem' }"
+>
+  @if (selectedBook(); as book) {
+    <dl class="book-details">
+      <dt>Author</dt>
+      <dd>{{ book.author }}</dd>
+      <dt>Genre</dt>
+      <dd>{{ book.genre || '-' }}</dd>
+      <dt>Publisher</dt>
+      <dd>{{ book.publisher || '-' }}</dd>
+      <dt>Published year</dt>
+      <dd>{{ book.publishedYear || '-' }}</dd>
+      <dt>ISBN</dt>
+      <dd>{{ book.isbn }}</dd>
+      <dt>Copies</dt>
+      <dd>{{ book.availableCopies }} available / {{ book.totalCopies }} total</dd>
+      <dt>Status</dt>
+      <dd><p-tag [value]="book.status" [severity]="statusSeverity(book.status)" /></dd>
+    </dl>
+
+    <div class="dialog-actions">
+      @if (canReserve(book)) {
+        <button
+          pButton
+          type="button"
+          [label]="reserveButtonLabel(book)"
+          [loading]="reserving()"
+          (click)="reserveBook(book)"
+        ></button>
+      }
+      @if (isManager()) {
+        <button
+          pButton
+          type="button"
+          label="Remove Book"
+          severity="danger"
+          [text]="true"
+          (click)="openRemoveCopies(book)"
+        ></button>
+      }
+    </div>
+
+    @if (isManager()) {
+      <div class="reservations-section">
+        <h4>Reservations</h4>
+        @if (loadingReservations()) {
+          <p class="status-text">Loading reservations...</p>
+        } @else if (bookReservations().length === 0) {
+          <p class="status-text">No active reservations for this book.</p>
+        } @else {
+          <ul class="reservation-list">
+            @for (reservation of bookReservations(); track reservation.id) {
+              <li>
+                <div class="info">
+                  <span class="username">{{ reservation.username }}</span>
+                  <p-tag [value]="reservation.status" />
+                  @if (reservation.status === 'RESERVED') {
+                    <span class="meta">Queue position: {{ reservation.queuePosition }}</span>
+                  }
+                </div>
+                <button
+                  pButton
+                  type="button"
+                  label="Remove"
+                  severity="danger"
+                  [text]="true"
+                  [loading]="cancellingReservationId() === reservation.id"
+                  (click)="cancelReservation(book, reservation)"
+                ></button>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    }
+  }
+</p-dialog>
+
+<p-dialog
+  header="Remove Copies"
+  [visible]="removeCopiesVisible()"
+  (visibleChange)="$event || closeRemoveCopies()"
+  [modal]="true"
+  [style]="{ width: '24rem' }"
+>
+  @if (bookToRemove(); as book) {
+    <p class="remove-copies-intro">
+      "{{ book.title }}" has {{ book.totalCopies }} cop{{ book.totalCopies === 1 ? 'y' : 'ies' }}. How many would
+      you like to remove?
+    </p>
+
+    <div class="field">
+      <label for="remove-count">Copies to remove</label>
+      <p-inputNumber
+        inputId="remove-count"
+        [ngModel]="removeCount()"
+        [ngModelOptions]="{ standalone: true }"
+        [useGrouping]="false"
+        (ngModelChange)="setRemoveCount($event, book.totalCopies)"
+      />
+    </div>
+
+    @if (removeCount() >= book.totalCopies) {
+      <p class="remove-copies-warning">This will remove the book entirely from the catalogue.</p>
+    }
+
+    <div class="dialog-actions">
+      <button pButton type="button" label="Cancel" severity="secondary" [text]="true" (click)="closeRemoveCopies()"></button>
+      <button
+        pButton
+        type="button"
+        label="Remove"
+        severity="danger"
+        [loading]="removing()"
+        (click)="confirmRemoveCopies()"
+      ></button>
+    </div>
+  }
+</p-dialog>
+
+<p-dialog
+  header="Add a Book"
+  [visible]="addBookVisible()"
+  (visibleChange)="addBookVisible.set($event)"
+  [modal]="true"
+  [style]="{ width: '28rem' }"
+>
+  <form class="add-book-form" [formGroup]="addBookForm" (ngSubmit)="submitAddBook()">
+    <div class="field">
+      <label for="add-isbn">ISBN</label>
+      <input pInputText id="add-isbn" formControlName="isbn" />
+    </div>
+    <div class="field">
+      <label for="add-title">Title</label>
+      <input pInputText id="add-title" formControlName="title" />
+    </div>
+    <div class="field">
+      <label for="add-author">Author</label>
+      <input pInputText id="add-author" formControlName="author" />
+    </div>
+    <div class="field">
+      <label for="add-publisher">Publisher</label>
+      <input pInputText id="add-publisher" formControlName="publisher" />
+    </div>
+    <div class="field">
+      <label for="add-year">Published year</label>
+      <p-inputNumber inputId="add-year" formControlName="publishedYear" [useGrouping]="false" />
+    </div>
+    <div class="field">
+      <label for="add-genre">Genre</label>
+      <input pInputText id="add-genre" formControlName="genre" />
+    </div>
+    <div class="field">
+      <label for="add-copies">Total copies</label>
+      <p-inputNumber inputId="add-copies" formControlName="totalCopies" [useGrouping]="false" />
+    </div>
+
+    <button pButton type="submit" label="Add Book" [loading]="savingBook()"></button>
+  </form>
+</p-dialog>

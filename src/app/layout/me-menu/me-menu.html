@@ -1,0 +1,145 @@
+<button type="button" class="icon-button" aria-label="My account" (click)="open()">
+  <i class="pi pi-user"></i>
+</button>
+
+<p-dialog
+  header="My Account"
+  [visible]="visible()"
+  (visibleChange)="$event || close()"
+  [modal]="true"
+  [style]="{ width: '34rem' }"
+>
+  <div class="dialog-body">
+    <section>
+      <h3>Profile</h3>
+      @if (loadingProfile()) {
+        <p class="status-text">Loading...</p>
+      } @else if (profile(); as p) {
+        <dl class="profile-details">
+          <dt>Name</dt>
+          <dd>{{ p.fullName }} ({{ username() }})</dd>
+          <dt>Email</dt>
+          <dd>{{ p.email }}</dd>
+          <dt>Role</dt>
+          <dd>{{ p.role }}</dd>
+          <dt>Status</dt>
+          <dd>{{ p.status }}</dd>
+          <dt>Group</dt>
+          <dd>{{ p.userGroupName }}</dd>
+          <dt>Loans</dt>
+          <dd>{{ p.activeLoanCount }} / {{ p.maxBooksAllowed }} books - {{ p.loanDurationDays }} day loans</dd>
+          <dt>Active reservations</dt>
+          <dd>{{ p.activeReservationCount }}</dd>
+          <dt>Outstanding balance</dt>
+          <dd>${{ p.outstandingBalance.toFixed(2) }}</dd>
+        </dl>
+      }
+    </section>
+
+    <section>
+      <h3>My Wishlist</h3>
+      @if (loadingWishlist()) {
+        <p class="status-text">Loading...</p>
+      } @else if (wishlist().length === 0) {
+        <p class="status-text">You're not waiting on any books.</p>
+      } @else {
+        <ul class="item-list">
+          @for (reservation of wishlist(); track reservation.id) {
+            <li>
+              <div class="info">
+                <span class="title">{{ reservation.bookTitle }}</span>
+                <p-tag [value]="reservation.status" />
+                @if (reservation.status === 'RESERVED') {
+                  <span class="meta">Queue position: {{ reservation.queuePosition }}</span>
+                } @else if (reservation.status === 'NOTIFIED') {
+                  <span class="meta">Ready for pickup!</span>
+                }
+              </div>
+              @if (isCancellable(reservation)) {
+                <button
+                  pButton
+                  type="button"
+                  label="Cancel"
+                  severity="danger"
+                  [text]="true"
+                  [loading]="cancellingId() === reservation.id"
+                  (click)="cancelReservation(reservation)"
+                ></button>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <section>
+      <h3>My Borrowing History</h3>
+      @if (loadingHistory()) {
+        <p class="status-text">Loading...</p>
+      } @else if (history().length === 0) {
+        <p class="status-text">No borrowing history yet.</p>
+      } @else {
+        <ul class="item-list">
+          @for (record of history(); track record.borrowingRecordId) {
+            <li>
+              <div class="info">
+                <span class="title">{{ record.bookTitle }}</span>
+                <p-tag [value]="record.status" />
+                <span class="meta">
+                  {{ record.borrowDate }} - {{ record.returnDate || record.dueDate }}
+                  @if (record.lateFee > 0) {
+                    <span class="late-fee">late fee ${{ record.lateFee.toFixed(2) }}</span>
+                  }
+                </span>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <section>
+      <h3>Payments</h3>
+      <p class="hint">Mock payment - no real payment gateway is called.</p>
+      <div class="payment-form">
+        <p-inputNumber
+          [ngModel]="paymentAmount()"
+          (ngModelChange)="paymentAmount.set($event)"
+          [ngModelOptions]="{ standalone: true }"
+          mode="currency"
+          currency="USD"
+          placeholder="Amount"
+        />
+        <p-select
+          [options]="paymentTypes"
+          [ngModel]="paymentType()"
+          (ngModelChange)="paymentType.set($event)"
+          [ngModelOptions]="{ standalone: true }"
+        />
+        <button pButton type="button" label="Make Payment" [loading]="paying()" (click)="makePayment()"></button>
+      </div>
+
+      @if (loadingPayments()) {
+        <p class="status-text">Loading...</p>
+      } @else if (payments().length === 0) {
+        <p class="status-text">No payments yet.</p>
+      } @else {
+        <ul class="item-list">
+          @for (payment of payments(); track payment.id) {
+            <li>
+              <div class="info">
+                <span class="title">${{ payment.amount.toFixed(2) }} - {{ payment.type }}</span>
+                <p-tag [value]="payment.status" />
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  </div>
+
+  <div class="dialog-actions">
+    <button pButton type="button" label="Cancel" severity="secondary" [text]="true" (click)="close()"></button>
+    <button pButton type="button" label="Log out" severity="danger" icon="pi pi-sign-out" (click)="logout()"></button>
+  </div>
+</p-dialog>

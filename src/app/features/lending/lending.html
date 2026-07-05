@@ -1,0 +1,82 @@
+<div class="lending-page">
+  <section class="panel">
+    <h2>Loan a Book</h2>
+    <form [formGroup]="loanForm" (ngSubmit)="submitLoan()">
+      <div class="field">
+        <label for="loan-username">Username</label>
+        <input pInputText id="loan-username" formControlName="username" />
+      </div>
+      <div class="field">
+        <label for="loan-isbn">ISBN</label>
+        <input pInputText id="loan-isbn" formControlName="isbn" />
+      </div>
+      <button pButton type="submit" label="Loan Out" [loading]="loaning()"></button>
+    </form>
+
+    @if (lastLoan(); as record) {
+      <div class="result">
+        <p><strong>{{ record.bookTitle }}</strong> loaned out</p>
+        <p>Due {{ record.dueDate }} ({{ daysUntilDue(record) }} days remaining)</p>
+        <p-tag [value]="record.status" />
+      </div>
+    }
+  </section>
+
+  <section class="panel">
+    <h2>Return a Book</h2>
+    <p class="hint">Enter the member's username and the book's ISBN.</p>
+    <form [formGroup]="returnForm" (ngSubmit)="submitReturn()">
+      <div class="field">
+        <label for="return-username">Username</label>
+        <input pInputText id="return-username" formControlName="username" />
+      </div>
+      <div class="field">
+        <label for="return-isbn">ISBN</label>
+        <input pInputText id="return-isbn" formControlName="isbn" />
+      </div>
+      <button pButton type="submit" label="Return" [loading]="returning()"></button>
+    </form>
+
+    @if (lastReturn(); as record) {
+      <div class="result">
+        <p><strong>{{ record.bookTitle }}</strong> returned</p>
+        @if (record.lateFee > 0) {
+          <p class="late-fee">Late fee charged: ${{ record.lateFee.toFixed(2) }}</p>
+        } @else {
+          <p>Returned on time - no late fee.</p>
+        }
+        <p-tag [value]="record.status" />
+      </div>
+    }
+  </section>
+
+  <section class="panel">
+    <h2>Authorise Payment</h2>
+    <p class="hint">Clears every pending payment for this member, up to the given amount.</p>
+    <form [formGroup]="paymentForm" (ngSubmit)="submitAuthorise()">
+      <div class="field">
+        <label for="payment-username">Username</label>
+        <input pInputText id="payment-username" formControlName="username" />
+      </div>
+      <div class="field">
+        <label for="payment-amount">Amount</label>
+        <p-inputNumber inputId="payment-amount" formControlName="amount" mode="currency" currency="USD" />
+      </div>
+      <button pButton type="submit" label="Authorise" [loading]="authorising()"></button>
+    </form>
+
+    @if (lastPayments().length > 0) {
+      <div class="result">
+        <p>{{ lastPayments().length }} payment(s) authorised:</p>
+        <ul class="payment-list">
+          @for (payment of lastPayments(); track payment.id) {
+            <li>
+              <span>${{ payment.amount.toFixed(2) }} - {{ payment.type }}</span>
+              <p-tag [value]="payment.status" severity="success" />
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  </section>
+</div>

@@ -1,0 +1,97 @@
+<div class="login-page">
+  <p-card
+    class="login-card"
+    header="Library App"
+    [subheader]="mode() === 'login' ? 'Sign in to your account' : 'Create a new account'"
+  >
+    @if (errorMessage()) {
+      <p-message severity="error" class="login-message">{{ errorMessage() }}</p-message>
+    }
+    @if (infoMessage()) {
+      <p-message severity="success" class="login-message">{{ infoMessage() }}</p-message>
+    }
+
+    @if (mode() === 'login') {
+      <form class="login-form" [formGroup]="loginForm" (ngSubmit)="submitLogin()">
+        <div class="field">
+          <label for="login-username">Username</label>
+          <input pInputText id="login-username" formControlName="username" autocomplete="username" />
+        </div>
+
+        <div class="field">
+          <label for="login-password">Password</label>
+          <p-password
+            inputId="login-password"
+            formControlName="password"
+            [feedback]="false"
+            [toggleMask]="true"
+            autocomplete="current-password"
+          />
+        </div>
+
+        <button
+          pButton
+          type="submit"
+          label="Log in"
+          class="submit-button"
+          [loading]="submitting()"
+        ></button>
+      </form>
+
+      <p class="switch-mode">
+        Don't have an account?
+        <a role="button" (click)="switchMode('register')">Create one</a>
+      </p>
+    } @else {
+      <form class="login-form" [formGroup]="registerForm" (ngSubmit)="submitRegister()">
+        <div class="field">
+          <label for="register-username">Username</label>
+          <input pInputText id="register-username" formControlName="username" autocomplete="username" />
+        </div>
+
+        <div class="field">
+          <label for="register-email">Email</label>
+          <input pInputText id="register-email" type="email" formControlName="email" autocomplete="email" />
+        </div>
+
+        <div class="field">
+          <label for="register-fullName">Full name</label>
+          <input pInputText id="register-fullName" formControlName="fullName" autocomplete="name" />
+        </div>
+
+        <div class="field">
+          <label for="register-password">Password</label>
+          <p-password
+            inputId="register-password"
+            formControlName="password"
+            [toggleMask]="true"
+            autocomplete="new-password"
+          />
+        </div>
+
+        <div class="field">
+          <label for="register-phone">Phone (optional)</label>
+          <input pInputText id="register-phone" formControlName="phone" autocomplete="tel" />
+        </div>
+
+        <div class="field">
+          <label for="register-address">Address (optional)</label>
+          <input pInputText id="register-address" formControlName="address" autocomplete="street-address" />
+        </div>
+
+        <button
+          pButton
+          type="submit"
+          label="Create account"
+          class="submit-button"
+          [loading]="submitting()"
+        ></button>
+      </form>
+
+      <p class="switch-mode">
+        Already have an account?
+        <a role="button" (click)="switchMode('login')">Log in</a>
+      </p>
+    }
+  </p-card>
+</div>
