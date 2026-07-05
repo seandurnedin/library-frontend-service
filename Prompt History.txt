@@ -1,0 +1,18 @@
+Help me to write a start up guide for me application in a readMe. rephrase these and add relevant steps as in the pointers
+
+To download and install these
+MySQL server and MySQL workbench - add in relevant installation guide
+DBeaver to view database
+Java 25 - add in guide and how to verify - steps like env vairables
+Maven 3.9.9 or later
+IntelliJ (preferably) IDE to open both library-service and domain-service
+open application.properties in domain.service and ensure app.data-seed.enabled=${DATA_SEED_ENABLED:true}
+username and password for spring.datasource.username and spring.datasource.password is configured right
+steps like - add as maven project - go to DomainServiceApplication and LibraryServiceApplication and click run
+
+Run angular UI and there will be default books and admin and manager accounts already:
+Admin : username: admin, password: ChangeMe123!
+Admin : username: manager, password: ChangeMe123!
+
+
+
