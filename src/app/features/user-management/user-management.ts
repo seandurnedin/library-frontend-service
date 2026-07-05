@@ -9,6 +9,7 @@ import { MessageService } from 'primeng/api';
 import { UserAdminService } from '../../core/services/user-admin.service';
 import { Role } from '../../core/models/role.model';
 import { User } from '../../core/models/user.model';
+import { EnumLabelPipe } from '../../core/pipes/enum-label.pipe';
 
 const ROLE_OPTIONS: Role[] = ['USER', 'MANAGER', 'ADMIN'];
 
@@ -19,7 +20,7 @@ interface PendingRoleChange {
 
 @Component({
   selector: 'app-user-management',
-  imports: [FormsModule, ButtonModule, SelectModule, DialogModule, TagModule],
+  imports: [FormsModule, ButtonModule, SelectModule, DialogModule, TagModule, EnumLabelPipe],
   templateUrl: './user-management.html',
   styleUrl: './user-management.scss',
 })

@@ -21,9 +21,9 @@
           <dt>Email</dt>
           <dd>{{ p.email }}</dd>
           <dt>Role</dt>
-          <dd>{{ p.role }}</dd>
+          <dd>{{ p.role | enumLabel }}</dd>
           <dt>Status</dt>
-          <dd>{{ p.status }}</dd>
+          <dd>{{ p.status | enumLabel }}</dd>
           <dt>Group</dt>
           <dd>{{ p.userGroupName }}</dd>
           <dt>Loans</dt>
@@ -48,7 +48,7 @@
             <li>
               <div class="info">
                 <span class="title">{{ reservation.bookTitle }}</span>
-                <p-tag [value]="reservation.status" />
+                <p-tag [value]="reservation.status | enumLabel" />
                 @if (reservation.status === 'RESERVED') {
                   <span class="meta">Queue position: {{ reservation.queuePosition }}</span>
                 } @else if (reservation.status === 'NOTIFIED') {
@@ -84,7 +84,7 @@
             <li>
               <div class="info">
                 <span class="title">{{ record.bookTitle }}</span>
-                <p-tag [value]="record.status" />
+                <p-tag [value]="record.status | enumLabel" />
                 <span class="meta">
                   {{ record.borrowDate }} - {{ record.returnDate || record.dueDate }}
                   @if (record.lateFee > 0) {
@@ -112,6 +112,8 @@
         />
         <p-select
           [options]="paymentTypes"
+          optionLabel="label"
+          optionValue="value"
           [ngModel]="paymentType()"
           (ngModelChange)="paymentType.set($event)"
           [ngModelOptions]="{ standalone: true }"
@@ -128,8 +130,8 @@
           @for (payment of payments(); track payment.id) {
             <li>
               <div class="info">
-                <span class="title">${{ payment.amount.toFixed(2) }} - {{ payment.type }}</span>
-                <p-tag [value]="payment.status" />
+                <span class="title">${{ payment.amount.toFixed(2) }} - {{ payment.type | enumLabel }}</span>
+                <p-tag [value]="payment.status | enumLabel" />
               </div>
             </li>
           }

@@ -14,14 +14,18 @@ import { PaymentService } from '../../core/services/payment.service';
 import { Reservation } from '../../core/models/reservation.model';
 import { UserBorrowingHistory, UserProfile } from '../../core/models/user.model';
 import { Payment, PaymentType } from '../../core/models/payment.model';
+import { EnumLabelPipe } from '../../core/pipes/enum-label.pipe';
 
 /** Cancellable states - a FULFILLED/EXPIRED reservation is history, not something to withdraw. */
 const CANCELLABLE_STATUSES: Reservation['status'][] = ['RESERVED', 'NOTIFIED'];
 const PAYMENT_TYPES: PaymentType[] = ['LATE_FEE', 'RESERVATION_FEE', 'LOST_BOOK_CHARGE', 'OTHER'];
+/** p-select shows `label` but binds `value` - so the dropdown reads "LATE FEE" while still
+ *  submitting the real "LATE_FEE" enum constant. */
+const PAYMENT_TYPE_OPTIONS = PAYMENT_TYPES.map((value) => ({ label: value.replace(/_/g, ' '), value }));
 
 @Component({
   selector: 'app-me-menu',
-  imports: [FormsModule, DialogModule, ButtonModule, TagModule, SelectModule, InputNumberModule],
+  imports: [FormsModule, DialogModule, ButtonModule, TagModule, SelectModule, InputNumberModule, EnumLabelPipe],
   templateUrl: './me-menu.html',
   styleUrl: './me-menu.scss',
 })
@@ -47,7 +51,7 @@ export class MeMenu {
 
   protected readonly loadingPayments = signal(false);
   protected readonly payments = signal<Payment[]>([]);
-  protected readonly paymentTypes = PAYMENT_TYPES;
+  protected readonly paymentTypes = PAYMENT_TYPE_OPTIONS;
   protected readonly paymentAmount = signal<number | null>(null);
   protected readonly paymentType = signal<PaymentType>('OTHER');
   protected readonly paying = signal(false);

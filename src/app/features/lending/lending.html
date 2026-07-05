@@ -17,7 +17,7 @@
       <div class="result">
         <p><strong>{{ record.bookTitle }}</strong> loaned out</p>
         <p>Due {{ record.dueDate }} ({{ daysUntilDue(record) }} days remaining)</p>
-        <p-tag [value]="record.status" />
+        <p-tag [value]="record.status | enumLabel" />
       </div>
     }
   </section>
@@ -45,7 +45,7 @@
         } @else {
           <p>Returned on time - no late fee.</p>
         }
-        <p-tag [value]="record.status" />
+        <p-tag [value]="record.status | enumLabel" />
       </div>
     }
   </section>
@@ -71,8 +71,8 @@
         <ul class="payment-list">
           @for (payment of lastPayments(); track payment.id) {
             <li>
-              <span>${{ payment.amount.toFixed(2) }} - {{ payment.type }}</span>
-              <p-tag [value]="payment.status" severity="success" />
+              <span>${{ payment.amount.toFixed(2) }} - {{ payment.type | enumLabel }}</span>
+              <p-tag [value]="payment.status | enumLabel" severity="success" />
             </li>
           }
         </ul>

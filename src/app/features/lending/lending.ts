@@ -10,12 +10,13 @@ import { LendingService } from '../../core/services/lending.service';
 import { PaymentService } from '../../core/services/payment.service';
 import { BorrowingRecord } from '../../core/models/borrowing-record.model';
 import { Payment } from '../../core/models/payment.model';
+import { EnumLabelPipe } from '../../core/pipes/enum-label.pipe';
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
 @Component({
   selector: 'app-lending',
-  imports: [ReactiveFormsModule, ButtonModule, InputTextModule, InputNumberModule, TagModule],
+  imports: [ReactiveFormsModule, ButtonModule, InputTextModule, InputNumberModule, TagModule, EnumLabelPipe],
   templateUrl: './lending.html',
   styleUrl: './lending.scss',
 })

@@ -3,6 +3,7 @@ export type BorrowingStatus = 'ON_LOAN' | 'RETURNED' | 'OVERDUE' | 'LOST';
 export interface BorrowingRecord {
   id: number;
   userId: number;
+  username: string;
   bookId: number;
   bookTitle: string;
   borrowDate: string;

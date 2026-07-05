@@ -22,4 +22,9 @@ export class LendingService {
   myLoans(): Observable<BorrowingRecord[]> {
     return this.http.get<BorrowingRecord[]>(`${this.baseUrl}/my-loans`);
   }
+
+  /** MANAGER only - every active (ON_LOAN or OVERDUE) loan for a book. */
+  forBook(bookId: number): Observable<BorrowingRecord[]> {
+    return this.http.get<BorrowingRecord[]>(`${this.baseUrl}/book/${bookId}`);
+  }
 }

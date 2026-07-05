@@ -53,7 +53,7 @@
       <dt>Copies</dt>
       <dd>{{ book.availableCopies }} available / {{ book.totalCopies }} total</dd>
       <dt>Status</dt>
-      <dd><p-tag [value]="book.status" [severity]="statusSeverity(book.status)" /></dd>
+      <dd><p-tag [value]="book.status | enumLabel" [severity]="statusSeverity(book.status)" /></dd>
     </dl>
 
     <div class="dialog-actions">
@@ -80,6 +80,27 @@
 
     @if (isManager()) {
       <div class="reservations-section">
+        <h4>Current Loans</h4>
+        @if (loadingLoans()) {
+          <p class="status-text">Loading loans...</p>
+        } @else if (bookLoans().length === 0) {
+          <p class="status-text">No copies currently on loan.</p>
+        } @else {
+          <ul class="reservation-list">
+            @for (loan of bookLoans(); track loan.id) {
+              <li>
+                <div class="info">
+                  <span class="username">{{ loan.username }}</span>
+                  <p-tag [value]="loan.status | enumLabel" [severity]="loan.status === 'OVERDUE' ? 'danger' : 'warn'" />
+                  <span class="meta">Due {{ loan.dueDate }}</span>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <div class="reservations-section">
         <h4>Reservations</h4>
         @if (loadingReservations()) {
           <p class="status-text">Loading reservations...</p>
@@ -91,7 +112,7 @@
               <li>
                 <div class="info">
                   <span class="username">{{ reservation.username }}</span>
-                  <p-tag [value]="reservation.status" />
+                  <p-tag [value]="reservation.status | enumLabel" />
                   @if (reservation.status === 'RESERVED') {
                     <span class="meta">Queue position: {{ reservation.queuePosition }}</span>
                   }

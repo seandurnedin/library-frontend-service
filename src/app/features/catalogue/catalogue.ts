@@ -11,9 +11,12 @@ import { TagModule } from 'primeng/tag';
 import { MessageService } from 'primeng/api';
 import { BookService } from '../../core/services/book.service';
 import { ReservationService } from '../../core/services/reservation.service';
+import { LendingService } from '../../core/services/lending.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Book, BookStatus } from '../../core/models/book.model';
 import { Reservation } from '../../core/models/reservation.model';
+import { BorrowingRecord } from '../../core/models/borrowing-record.model';
+import { EnumLabelPipe } from '../../core/pipes/enum-label.pipe';
 
 const PAGE_SIZE = 12;
 
@@ -34,6 +37,7 @@ const RESERVABLE_STATUSES: BookStatus[] = ['IN_STORE', 'ON_LOAN', 'RESERVED'];
     DialogModule,
     PaginatorModule,
     TagModule,
+    EnumLabelPipe,
   ],
   templateUrl: './catalogue.html',
   styleUrl: './catalogue.scss',
@@ -41,6 +45,7 @@ const RESERVABLE_STATUSES: BookStatus[] = ['IN_STORE', 'ON_LOAN', 'RESERVED'];
 export class Catalogue implements OnInit {
   private readonly bookService = inject(BookService);
   private readonly reservationService = inject(ReservationService);
+  private readonly lendingService = inject(LendingService);
   private readonly authService = inject(AuthService);
   private readonly messageService = inject(MessageService);
   private readonly fb = inject(FormBuilder);
@@ -64,6 +69,9 @@ export class Catalogue implements OnInit {
   protected readonly bookReservations = signal<Reservation[]>([]);
   protected readonly loadingReservations = signal(false);
   protected readonly cancellingReservationId = signal<number | null>(null);
+
+  protected readonly bookLoans = signal<BorrowingRecord[]>([]);
+  protected readonly loadingLoans = signal(false);
 
   protected readonly addBookVisible = signal(false);
   protected readonly savingBook = signal(false);
@@ -96,12 +104,14 @@ export class Catalogue implements OnInit {
     this.selectedBook.set(book);
     if (this.isManager()) {
       this.loadReservations(book.id);
+      this.loadLoans(book.id);
     }
   }
 
   closeBook(): void {
     this.selectedBook.set(null);
     this.bookReservations.set([]);
+    this.bookLoans.set([]);
   }
 
   /** MANAGER only - lets a manager remove any member's reservation, e.g. if they call to cancel
@@ -297,6 +307,20 @@ export class Catalogue implements OnInit {
       error: () => {
         this.loadingReservations.set(false);
         this.messageService.add({ severity: 'error', summary: 'Could not load reservations' });
+      },
+    });
+  }
+
+  private loadLoans(bookId: number): void {
+    this.loadingLoans.set(true);
+    this.lendingService.forBook(bookId).subscribe({
+      next: (loans) => {
+        this.bookLoans.set(loans);
+        this.loadingLoans.set(false);
+      },
+      error: () => {
+        this.loadingLoans.set(false);
+        this.messageService.add({ severity: 'error', summary: 'Could not load loans' });
       },
     });
   }
