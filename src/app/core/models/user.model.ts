@@ -36,7 +36,8 @@ export interface UserProfile {
   loanDurationDays: number;
   activeLoanCount: number;
   activeReservationCount: number;
-  outstandingBalance: number;
+  /** Nullable - the backend's BigDecimal can be absent when the user has never owed anything. */
+  outstandingBalance: number | null;
 }
 
 export interface UserBorrowingHistory {

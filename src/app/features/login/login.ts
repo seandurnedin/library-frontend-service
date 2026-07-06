@@ -1,6 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
@@ -8,6 +7,7 @@ import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
 import { AuthService } from '../../core/services/auth.service';
+import { extractErrorMessage } from '../../core/utils/error-message';
 
 type Mode = 'login' | 'register';
 
@@ -63,7 +63,7 @@ export class Login {
       },
       error: (err: unknown) => {
         this.submitting.set(false);
-        this.errorMessage.set(this.extractErrorMessage(err, 'Invalid username or password.'));
+        this.errorMessage.set(extractErrorMessage(err, 'Invalid username or password.'));
       },
     });
   }
@@ -97,16 +97,8 @@ export class Login {
         },
         error: (err: unknown) => {
           this.submitting.set(false);
-          this.errorMessage.set(this.extractErrorMessage(err, 'Could not create the account.'));
+          this.errorMessage.set(extractErrorMessage(err, 'Could not create the account.'));
         },
       });
-  }
-
-  private extractErrorMessage(err: unknown, fallback: string): string {
-    if (err instanceof HttpErrorResponse) {
-      const message = (err.error as { message?: string } | null)?.message;
-      if (message) return message;
-    }
-    return fallback;
   }
 }

@@ -27,7 +27,7 @@
       }
     </div>
 
-    <p-paginator [first]="first()" [rows]="12" [totalRecords]="totalRecords()" (onPageChange)="onPageChange($event)" />
+    <p-paginator [first]="first()" [rows]="pageSize" [totalRecords]="totalRecords()" (onPageChange)="onPageChange($event)" />
   }
 </div>
 
@@ -187,7 +187,10 @@
   <form class="add-book-form" [formGroup]="addBookForm" (ngSubmit)="submitAddBook()">
     <div class="field">
       <label for="add-isbn">ISBN</label>
-      <input pInputText id="add-isbn" formControlName="isbn" />
+      <input pInputText id="add-isbn" formControlName="isbn" inputmode="numeric" maxlength="13" placeholder="13 digits" />
+      @if (addBookForm.controls.isbn.invalid && addBookForm.controls.isbn.touched) {
+        <small class="field-error">ISBN must be exactly 13 digits.</small>
+      }
     </div>
     <div class="field">
       <label for="add-title">Title</label>

@@ -1,5 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { HttpErrorResponse } from '@angular/common/http';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { ButtonModule } from 'primeng/button';
@@ -8,7 +7,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogModule } from 'primeng/dialog';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { TagModule } from 'primeng/tag';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { BookService } from '../../core/services/book.service';
 import { ReservationService } from '../../core/services/reservation.service';
 import { LendingService } from '../../core/services/lending.service';
@@ -17,8 +16,11 @@ import { Book, BookStatus } from '../../core/models/book.model';
 import { Reservation } from '../../core/models/reservation.model';
 import { BorrowingRecord } from '../../core/models/borrowing-record.model';
 import { EnumLabelPipe } from '../../core/pipes/enum-label.pipe';
+import { extractErrorMessage } from '../../core/utils/error-message';
 
 const PAGE_SIZE = 12;
+/** Typing pause before the search actually hits the backend - avoids one request per keystroke. */
+const SEARCH_DEBOUNCE_MS = 300;
 
 /** A book can be reserved regardless of availability - except LOST, where there's nothing to
  *  ever hold or wait for. If copies are available, reserving holds one immediately (decrementing
@@ -42,14 +44,18 @@ const RESERVABLE_STATUSES: BookStatus[] = ['IN_STORE', 'ON_LOAN', 'RESERVED'];
   templateUrl: './catalogue.html',
   styleUrl: './catalogue.scss',
 })
-export class Catalogue implements OnInit {
+export class Catalogue implements OnInit, OnDestroy {
   private readonly bookService = inject(BookService);
   private readonly reservationService = inject(ReservationService);
   private readonly lendingService = inject(LendingService);
   private readonly authService = inject(AuthService);
   private readonly messageService = inject(MessageService);
+  private readonly confirmationService = inject(ConfirmationService);
   private readonly fb = inject(FormBuilder);
 
+  private searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+  protected readonly pageSize = PAGE_SIZE;
   protected readonly isManager = computed(() => this.authService.role() === 'MANAGER');
 
   protected readonly books = signal<Book[]>([]);
@@ -76,7 +82,8 @@ export class Catalogue implements OnInit {
   protected readonly addBookVisible = signal(false);
   protected readonly savingBook = signal(false);
   protected readonly addBookForm = this.fb.nonNullable.group({
-    isbn: ['', Validators.required],
+    // ISBN-13: exactly 13 digits (matches the backend's @Size/@Pattern on AddBookRequest).
+    isbn: ['', [Validators.required, Validators.pattern(/^\d{13}$/)]],
     title: ['', Validators.required],
     author: ['', Validators.required],
     publisher: [''],
@@ -89,6 +96,12 @@ export class Catalogue implements OnInit {
     this.loadBooks();
   }
 
+  ngOnDestroy(): void {
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
+    }
+  }
+
   onPageChange(event: PaginatorState): void {
     this.first.set(event.first ?? 0);
     this.loadBooks();
@@ -97,7 +110,10 @@ export class Catalogue implements OnInit {
   onSearch(term: string): void {
     this.search.set(term);
     this.first.set(0);
-    this.loadBooks();
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
+    }
+    this.searchDebounceTimer = setTimeout(() => this.loadBooks(), SEARCH_DEBOUNCE_MS);
   }
 
   openBook(book: Book): void {
@@ -117,8 +133,17 @@ export class Catalogue implements OnInit {
   /** MANAGER only - lets a manager remove any member's reservation, e.g. if they call to cancel
    *  or never come to collect a held copy. */
   cancelReservation(book: Book, reservation: Reservation): void {
-    if (!confirm(`Remove ${reservation.username}'s reservation for "${book.title}"?`)) return;
+    this.confirmationService.confirm({
+      header: 'Remove Reservation',
+      message: `Remove ${reservation.username}'s reservation for "${book.title}"?`,
+      icon: 'pi pi-exclamation-triangle',
+      acceptButtonProps: { label: 'Remove', severity: 'danger' },
+      rejectButtonProps: { label: 'Keep', severity: 'secondary', text: true },
+      accept: () => this.doCancelReservation(book, reservation),
+    });
+  }
 
+  private doCancelReservation(book: Book, reservation: Reservation): void {
     this.cancellingReservationId.set(reservation.id);
     this.reservationService.cancelForBook(book.id, reservation.id).subscribe({
       next: () => {
@@ -133,7 +158,7 @@ export class Catalogue implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: 'Could not remove reservation',
-          detail: this.errorMessage(err),
+          detail: extractErrorMessage(err),
         });
       },
     });
@@ -171,7 +196,7 @@ export class Catalogue implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: 'Could not reserve the book',
-          detail: this.errorMessage(err),
+          detail: extractErrorMessage(err),
         });
       },
     });
@@ -209,7 +234,7 @@ export class Catalogue implements OnInit {
           this.messageService.add({
             severity: 'error',
             summary: 'Could not add book',
-            detail: this.errorMessage(err),
+            detail: extractErrorMessage(err),
           });
         },
       });
@@ -262,7 +287,7 @@ export class Catalogue implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: 'Could not remove copies',
-          detail: this.errorMessage(err),
+          detail: extractErrorMessage(err),
         });
       },
     });
@@ -325,10 +350,4 @@ export class Catalogue implements OnInit {
     });
   }
 
-  private errorMessage(err: unknown): string {
-    if (err instanceof HttpErrorResponse) {
-      return (err.error as { message?: string } | null)?.message ?? 'Please try again.';
-    }
-    return 'Please try again.';
-  }
 }

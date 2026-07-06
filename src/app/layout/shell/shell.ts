@@ -4,6 +4,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { PopoverModule } from 'primeng/popover';
 import { OverlayBadgeModule } from 'primeng/overlaybadge';
 import { ToastModule } from 'primeng/toast';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { Role } from '../../core/models/role.model';
@@ -25,7 +26,7 @@ const NAV_ITEMS: NavItem[] = [
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterLink, RouterLinkActive, RouterOutlet, DatePipe, PopoverModule, OverlayBadgeModule, ToastModule, MeMenu],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, DatePipe, PopoverModule, OverlayBadgeModule, ToastModule, ConfirmDialogModule, MeMenu],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
 })

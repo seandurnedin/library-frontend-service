@@ -1,1 +1,23 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global styles - component-specific styling lives next to each component. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--p-font-family, 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--p-text-color, #334155);
+  background: var(--p-content-background, #ffffff);
+  -webkit-font-smoothing: antialiased;
+}

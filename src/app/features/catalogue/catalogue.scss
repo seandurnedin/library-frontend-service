@@ -1,5 +1,7 @@
 .catalogue-page {
   padding: 1.5rem;
+  max-width: 60rem;
+  margin: 0 auto;
 }
 
 .toolbar {
@@ -14,7 +16,8 @@
 }
 
 .status-text {
-  opacity: 0.7;
+  color: var(--p-text-muted-color, rgba(0, 0, 0, 0.6));
+  margin: 0;
 }
 
 .book-grid {
@@ -27,7 +30,7 @@
 .book-card {
   text-align: left;
   cursor: pointer;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--p-content-border-color, rgba(0, 0, 0, 0.1));
   border-radius: 0.5rem;
   padding: 1rem;
   background: none;
@@ -35,10 +38,19 @@
   align-items: baseline;
   gap: 1rem;
   font-family: inherit;
+  font-size: inherit;
+  color: inherit;
   width: 100%;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 
   &:hover {
     border-color: var(--p-primary-color, #6366f1);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--p-primary-color, #6366f1);
+    outline-offset: 2px;
   }
 
   .book-title {
@@ -49,7 +61,7 @@
   .book-author,
   .book-genre {
     font-size: 0.85rem;
-    opacity: 0.75;
+    color: var(--p-text-muted-color, rgba(0, 0, 0, 0.6));
   }
 }
 
@@ -61,7 +73,7 @@
 
   dt {
     font-weight: 600;
-    opacity: 0.7;
+    color: var(--p-text-muted-color, rgba(0, 0, 0, 0.6));
   }
 
   dd {
@@ -82,10 +94,20 @@
   gap: 0.375rem;
   margin-bottom: 1rem;
 
+  label {
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
   input,
   p-inputnumber {
     width: 100%;
   }
+}
+
+.field-error {
+  color: var(--p-red-500, #ef4444);
+  font-size: 0.8rem;
 }
 
 .add-book-form {
@@ -112,7 +134,7 @@
 .reservations-section {
   margin-top: 1.25rem;
   padding-top: 1rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: 1px solid var(--p-content-border-color, rgba(0, 0, 0, 0.08));
 
   h4 {
     margin: 0 0 0.5rem;
@@ -126,7 +148,6 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
 
   li {
     display: flex;
@@ -134,7 +155,10 @@
     justify-content: space-between;
     gap: 1rem;
     padding: 0.5rem 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+    &:not(:last-child) {
+      border-bottom: 1px solid var(--p-content-border-color, rgba(0, 0, 0, 0.08));
+    }
   }
 
   .info {
@@ -150,6 +174,6 @@
 
   .meta {
     font-size: 0.8rem;
-    opacity: 0.7;
+    color: var(--p-text-muted-color, rgba(0, 0, 0, 0.6));
   }
 }

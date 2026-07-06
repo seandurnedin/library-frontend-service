@@ -3,23 +3,26 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
   gap: 1.5rem;
-  align-items: start;
+  align-items: stretch;
 }
 
 .panel {
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--p-content-border-color, rgba(0, 0, 0, 0.1));
   border-radius: 0.5rem;
   padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
 
   h2 {
-    margin: 0 0 0.75rem;
+    margin: 0 0 0.5rem;
     font-size: 1.05rem;
   }
 
   .hint {
     margin: 0 0 0.75rem;
     font-size: 0.85rem;
-    opacity: 0.7;
+    color: var(--p-text-muted-color, rgba(0, 0, 0, 0.6));
+    min-height: 2.5rem;
   }
 
   form {
@@ -40,34 +43,3 @@
   }
 }
 
-.result {
-  margin-top: 1.25rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  font-size: 0.9rem;
-
-  p {
-    margin: 0 0 0.5rem;
-  }
-
-  .late-fee {
-    color: var(--p-red-500, #ef4444);
-    font-weight: 600;
-  }
-}
-
-.payment-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-
-  li {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-  }
-}

@@ -1,6 +1,7 @@
 <div class="lending-page">
   <section class="panel">
     <h2>Loan a Book</h2>
+    <p class="hint">Enter the member's username and the book's ISBN.</p>
     <form [formGroup]="loanForm" (ngSubmit)="submitLoan()">
       <div class="field">
         <label for="loan-username">Username</label>
@@ -12,14 +13,6 @@
       </div>
       <button pButton type="submit" label="Loan Out" [loading]="loaning()"></button>
     </form>
-
-    @if (lastLoan(); as record) {
-      <div class="result">
-        <p><strong>{{ record.bookTitle }}</strong> loaned out</p>
-        <p>Due {{ record.dueDate }} ({{ daysUntilDue(record) }} days remaining)</p>
-        <p-tag [value]="record.status | enumLabel" />
-      </div>
-    }
   </section>
 
   <section class="panel">
@@ -36,18 +29,6 @@
       </div>
       <button pButton type="submit" label="Return" [loading]="returning()"></button>
     </form>
-
-    @if (lastReturn(); as record) {
-      <div class="result">
-        <p><strong>{{ record.bookTitle }}</strong> returned</p>
-        @if (record.lateFee > 0) {
-          <p class="late-fee">Late fee charged: ${{ record.lateFee.toFixed(2) }}</p>
-        } @else {
-          <p>Returned on time - no late fee.</p>
-        }
-        <p-tag [value]="record.status | enumLabel" />
-      </div>
-    }
   </section>
 
   <section class="panel">
@@ -64,19 +45,5 @@
       </div>
       <button pButton type="submit" label="Authorise" [loading]="authorising()"></button>
     </form>
-
-    @if (lastPayments().length > 0) {
-      <div class="result">
-        <p>{{ lastPayments().length }} payment(s) authorised:</p>
-        <ul class="payment-list">
-          @for (payment of lastPayments(); track payment.id) {
-            <li>
-              <span>${{ payment.amount.toFixed(2) }} - {{ payment.type | enumLabel }}</span>
-              <p-tag [value]="payment.status | enumLabel" severity="success" />
-            </li>
-          }
-        </ul>
-      </div>
-    }
   </section>
 </div>

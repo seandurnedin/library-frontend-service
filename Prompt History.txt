@@ -15,4 +15,94 @@ Admin : username: admin, password: ChangeMe123!
 Admin : username: manager, password: ChangeMe123!
 
 
+---- Start of Frontend Prompt history ----
+
+This is the context:
+library-service-api-docs, this is the api docs for my backend which will be a java springboot application.
+
+I will be creating an application that has a log in page and then based on roles after log on, there will be a response under the "Auth" tags in the api-docs.
+
+There will be a log in page where I can log in or create a new account.
+
+Once logged there will be a single page application where it will look like a dashboard where the top menu will have tabs on the left, flushed to the right there will be notification tab and logout.
+
+Log in function will also use JWT as web security to communicate between the frontend service and library service.
+
+Notifications will be for user notification on available waitlist books where it will be sent via SseEmitter front SpringBoot as SSEs
+
+Based on roles, there will be different tabs:
+
+USER: Catelogue tab - loan request/waitlist for book
+View all books in catalogue, use Pageable
+View loaned books
+View wishlist
+Make payment (mock function)
+View payment history
+
+ADMIN: Roles tab that will control user roles and groups
+
+MANAGER: Book mangement tab - add/remove books
+Return/loan out books
+Authorise payments
+
+Could you create the models for me under core/models
+
+OK i need you to now build the layout, the dashboard look with the tabs and notification button and logout button, the shell will contain these contains and a router-outlet to allow me to route the other components i.e. the book tab, suer management tab and the lending tab
+
+ok help me to create the 3 tabs, and implement the functions.
+
+Book management: adding and removing books, Lending and returning the books,  late fee charges, tracking the days
+
+User management: user profile management list users by role, update role and move user to a different role
+
+manager tab: should be able to return a book, loan out a book, and authorise a manual payment by a user at the library
+
+Catalogue tab: View books, back uses jparepository and returns a pageable but is transformed into the PageResponse model.
+Each book should like a card in a table where i can click on it and a p-dialog appears and i view the book. only key things like name, author and genre should nbe seen on the card, everything else will be in the dialog. i can waitlist the book if not In Store.
+
+Notification: on log in, remember to subscribe to the SSE, call the api /mine to check if there are notifications for the user
+
+notification icon will have a red small icon below to indicate notification alerts and also rembr to call the read notification button 
+
+change the logout icon to a me: it will promt a dialkog so i can check wwaitlist, log out or cancel my waitlist
+
+tell me if i missed out any api  calls from the api-docs
+
+
+
+1.GET /api/users/me and GET /api/users/me/history — not consumed anywhere. Nothing in this build needed "my profile"/"my full history"; only the wishlist made it into the Me dialog. -- do implement this within the me menu
+
+
+2.PUT /api/books/{id} (updateBook) — added the service method, but no "Edit Book" UI (you only asked for add/remove). -- this is for when theres duplicate book by isbn, hence backjend will handle the number of books by index isbn
+
+3.POST /api/payments/pay — added the service method, not wired to any UI (that's the USER-side "make a payment" screen, which wasn't part of these three tabs). -- we can add this in the me-menu too, but make this is a mock function, hence just a button with no effects
+
+4. GET /api/payments/history — same, service method exists, no consumer yet. --m add this into the me menu, called also when user clicks on the button
+
+i need to edit the remove book functionality, as a manager when i want to remove book, and if there are more than 1 copy of the same book, i should receieve a prompt to confirm with x amount of copies, not just confirm to remove
+
+can the pop up use the same p-dialog but overlayed? also, lets edit the function. i want to remove 1 of 2 copies instead of removing all copies. I can input the number of copies to remove on the p-dialog confirmation
+
+also for the catalogue page, i want the books to be displayed downwards not in one line
+
+i want to change the lending page 
+i want to loan the book by book isbn and username.                  
+                                                                                                                                                                                                     also returning should be returning book by isbn and username                                                                            
+
+
+authorise payment is also done by username
+
+
+change the way login works, when i create the account, do not attempt to log in base on the create response, bring them back to the main login page for them to log in
+
+lets add in a functionality in catalogue page, as a manager i want to be able to view who are the users loaning out the books.
+
+also fix the labels for IN_STORE in the book dialog, on_loan label and returned label to be all caps without _ check for other labels too
+
+adding a book with the same isbn should update the number of copies instead of sending an error saying that book with that isbn already exists, check if the title, author and other inputs are same as book with that isbn is same if not throw the current error.
+
+
+
+
+
 

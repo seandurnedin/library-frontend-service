@@ -1,5 +1,4 @@
 import { Component, inject, signal } from '@angular/core';
-import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
@@ -10,6 +9,7 @@ import { UserAdminService } from '../../core/services/user-admin.service';
 import { Role } from '../../core/models/role.model';
 import { User } from '../../core/models/user.model';
 import { EnumLabelPipe } from '../../core/pipes/enum-label.pipe';
+import { extractErrorMessage } from '../../core/utils/error-message';
 
 const ROLE_OPTIONS: Role[] = ['USER', 'MANAGER', 'ADMIN'];
 
@@ -89,7 +89,7 @@ export class UserManagement {
         this.messageService.add({
           severity: 'error',
           summary: 'Could not update role',
-          detail: this.errorMessage(err),
+          detail: extractErrorMessage(err),
         });
       },
     });
@@ -110,10 +110,4 @@ export class UserManagement {
     });
   }
 
-  private errorMessage(err: unknown): string {
-    if (err instanceof HttpErrorResponse) {
-      return (err.error as { message?: string } | null)?.message ?? 'Please try again.';
-    }
-    return 'Please try again.';
-  }
 }
